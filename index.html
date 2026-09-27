@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="es"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260925-05-46ec85d","C":{"Abril Fatface":"YACgEZbkUVE,0","Alfa Slab One":"YACgEYS9sJU,0","Anton":"YACgEcYqQ-A,0","Archivo":"YACgEZulLoA,0","Arial Narrow":"YAGyDvJ_4Ts,0","Arial Rounded MT Bold":"YAFcfoaHu-s,0","Arial":"YAGyDvJ_4Ts,0","Avenir Next":"YAFcfmNq6UY,0","Baloo 2":"YADK30bC6HQ,0","Bebas Neue":"YACgESME5ew,0","Bricolage Grotesque":"YAFyMcdwzpc,0","Broken Glyph":"YADZ-exUkv0,0","Canva Sans":"YAFdJjTk5UU,1","Caveat":"YALBs2ploWQ,0","Comic Sans MS":"YAFcfvtOAUY,1","Cormorant Garamond":"YAFdJhX-538,0","Courier New":"YAGzXiGs0_8,0","Courier Prime":"YAD1aFjegN8,0","DM Sans":"YAD1aU3sLnI,0","DM Serif Display":"YAD1aYG82rc,0","Forum":"YACgEcnnqB4,0","Fraunces":"YAFdJpU7Kkk,0","Georgia":"YAGzXkO0pEM,0","Ghost Mono":"YAHQutsX00Q,0","Hanken Grotesk":"YAFcfhwp99E,0","Helvetica Neue":"YAFcf6CtJfI,0","Helvetica":"YAFcf6CtJfI,0","IBM Plex Mono":"YAFdJkmvhGI,0","Impact":"YAFcfnjI7Vk,0","Instrument Serif":"YAHFeOnZNEk,0","Inter":"YAFdJvSyp_k,3","Iowan Old Style":"YAGNIFa8j9o,0","Jacques Francois":"YADK3zbC6RM,0","JetBrains Mono":"YAFdJksXcAk,0","Josefin Sans":"YAFdJjvw9Ps,0","Lato":"YAFdJuFCnaw,0","Libre Baskerville":"YACgEUFdPdA,0","Lobster":"YAD8SnSjSFI,0","Lora":"YACgEXvxf8Q,0","Merriweather":"YACgEXvHxxs,0","Montserrat":"YAFdtQi73Xs,0","Nunito":"YAFdJoNRMmU,1","Oleo Script":"YACgEQQ14jI,0","Oswald":"YACgEQY10lw,0","Pacifico":"YADLjORQ1u4,0","Phantom Sans":"YAFdJvgJ5TU,0","Playfair Display":"YAFdJhem5V8,1","Plus Jakarta Sans":"YAGvf3_u0_Q,0","Poppins":"YAFdJjbTu24,1","Press Start 2P":"YAFyGr-8pmQ,0","Quicksand":"YAFdJpYtCxE,1","Raleway":"YAFdJhmxbVQ,1","Roboto Slab":"YAFdJswIKAg,0","Rockwell":"YAFcfyVZnN0,0","Rye":"YACgEdQP21k,0","Segoe UI":"YAHNdRD1Klw,0","Source Sans 3":"YAG4lO1Mj10,0","Source Serif 4":"YACgEfdj394,0","Space Grotesk":"YADZ-dYEmhg,0","Space Mono":"YADW1-vpsoc,0","Times New Roman":"YAGzXW3gftg,0","Times":"YAGzXW3gftg,0","Trebuchet MS":"YAFcfrglpVA,0","UV Display":"YAEdVfSSpYo,0","UV Sans":"YAFdJvgJ5TU,0","Ubuntu":"YACgERDU--Q,0","Verdana":"YAGzXTctYtQ,0","Work Sans":"YAGXhLOKv44,0","Yellowtail":"YACgEYG4kG4,0","ui-monospace":"YAD1aFjegN8,0","ui-sans-serif":"YACkoD1yZN0,0"}}');</script><script src="/_sdk/6542d56fbfe7a3eb.telemetry_sdk.js" integrity="sha512-ECdM0nK7EkwDuOqho2qxgyRQXyBHk9hZqRKMBr+Xsu6zjeHlt+qkO2N2YRiHN7Kg4e1fEHDhjIp4bGJYVypv1g=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de stickers</title>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#1d2939; --cream:#fffaf1; --orange:#f25c32; --orange-dark:#cf3f1a; --sage:#e6f0df; --teal:#1d7a8c; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"DM Sans",sans-serif; color:var(--ink); }
+    button,input { font:inherit; }
+    button:focus-visible,input:focus-visible { outline:3px solid var(--teal); outline-offset:3px; }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .app-shell { width:100%; min-height:calc(100 * min(var(--vh, 1vh), 1vh)); background:#fffaf1; }
+    .grain { background-image:radial-gradient(rgba(104,66,37,.11) .7px,transparent .7px); background-size:9px 9px; }
+    .checker {
+      background-color:#f3f5f4;
+      background-image:linear-gradient(45deg,#dce2df 25%,transparent 25%),linear-gradient(-45deg,#dce2df 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#dce2df 75%),linear-gradient(-45deg,transparent 75%,#dce2df 75%);
+      background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0;
+    }
+    .upload-zone { border:2px dashed #b8c9bd; transition:.2s ease; }
+    .upload-zone.dragging { border-color:var(--orange); background:#fff0e9; }
+    .main-canvas-wrap { height:clamp(330px,calc(58 * min(var(--vh,1vh),1vh)),600px); }
+    .editor-stage { height:clamp(420px,calc(68 * min(var(--vh,1vh),1vh)),720px); touch-action:none; cursor:crosshair; }
+    .editor-stage.pan-mode { cursor:grab; }
+    .editor-stage.pan-mode.dragging { cursor:grabbing; }
+    .scene { position:absolute; transform-origin:0 0; }
+    .sticker-thumb { min-width:154px; scroll-snap-align:start; transition:.18s ease; }
+    .sticker-thumb:hover { transform:translateY(-2px); }
+    .sticker-thumb.active { outline:3px solid var(--teal); outline-offset:2px; }
+    .tool-button.active { background:#1d2939!important; color:#fff!important; border-color:#1d2939!important; }
+    .selection-shape { position:absolute; border:2px dashed #f25c32; pointer-events:none; box-shadow:0 0 0 2px rgba(255,255,255,.8); }
+    .selection-shape.ellipse { border-radius:999px; }
+    .selection-path { position:absolute; inset:0; pointer-events:none; overflow:visible; }
+    .reveal { animation:rise .4s ease both; }
+    @keyframes rise { from {opacity:0;transform:translateY(12px)} to {opacity:1;transform:translateY(0)} }
+    input[type=range] { accent-color:#f25c32; }
+    @media(max-width:640px) {
+      .editor-stage { height:calc(62 * min(var(--vh,1vh),1vh)); }
+      .main-canvas-wrap { height:380px; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="/_sdk/6c2ecc939521f244.data_sdk.js" type="text/javascript" integrity="sha512-gRx8s+XsZDN6mSIQu2sivLZysbV0WHhb5kXNUWlgVb5lCMU1foJYukyMEDPv8Tnoocb8iwqB4XdRrWc7oEGzIQ=="></script>
+  <script src="/_sdk/ef0304cb8c7ed696.editing_sdk.js" type="text/javascript" integrity="sha512-kmL9L5Yuj57MQaequKbMA3aGpT/5lBUp10iGA3e3qnmMLs2ZZQ0poCcIfdd5rTgrhEvNPe4HK0ohePW7ZpgAFg=="></script>
+  <script src="/_sdk/ddcab3e45959c817.resizing_sdk.js" type="text/javascript" integrity="sha512-VAviUKfZVzugWBSeULYjSljTX+nb84wc6Zzbx5GQaQgh6X2ISSjXi8eIiCDGdwDh10esJMY0+QFQgUy9NcrTlQ=="></script>
+ </head>
+ <body data-template-id="__page-root" style="background: rgb(255, 250, 241);">
+  <div class="app-shell grain">
+   <header class="w-full px-5 pt-6 sm:px-8 lg:px-10">
+    <div class="mx-auto flex max-w-[1600px] items-center justify-between">
+     <div class="flex items-center gap-3">
+      <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f25c32] text-white shadow-[0_5px_0_#cf3f1a]">
+       <i data-lucide="scissors"></i>
+      </div>
+      <div>
+       <h1 data-template-id="app-title" class="canva-text font-bold leading-tight" style="color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 20px;">Generador de stickers</h1>
+       <p data-template-id="app-kicker" class="canva-text text-sm" style="color: rgb(101, 112, 128); font-weight: 400; font-style: normal; font-size: 13px;">Detecta, edita y descarga</p>
+      </div>
+     </div><span data-template-id="header-badge" class="canva-tag hidden rounded-full px-4 py-2 text-sm font-bold sm:block" style="background: rgb(230, 240, 223); color: rgb(56, 97, 69); font-weight: 700; font-style: normal; font-size: 16px;">PNG transparente</span>
+    </div>
+   </header>
+   <main class="w-full px-5 pb-12 pt-7 sm:px-8 lg:px-10">
+    <div class="mx-auto max-w-[1600px]">
+     <section id="upload-section" class="reveal mx-auto max-w-3xl">
+      <div data-template-id="upload-panel" class="canva-panel rounded-[2rem] p-6 shadow-[0_12px_35px_rgba(53,42,25,.10)] sm:p-9" style="background: rgb(255, 255, 255);">
+       <p data-template-id="upload-eyebrow" class="canva-text text-sm font-bold uppercase tracking-[.16em]" style="color: rgb(242, 92, 50); font-weight: 700; font-style: normal; font-size: 13px;">De imagen a sticker</p>
+       <h2 data-template-id="upload-title" class="canva-text mt-2 font-['Fraunces'] font-bold" style="color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 24px;">Carga una imagen para empezar</h2>
+       <p data-template-id="upload-description" class="canva-text mt-2 max-w-xl leading-relaxed" style="color: rgb(101, 112, 128); font-weight: 400; font-style: normal; font-size: 16px;">Usa una imagen PNG, JPG o WEBP. Después podrás abrir y editar cada sticker por separado.</p>
+       <div id="upload-zone" class="upload-zone mt-6 rounded-2xl p-8 text-center sm:p-12"><i data-lucide="image-up" class="mx-auto h-11 w-11 text-[#f25c32]"></i>
+        <p data-template-id="drop-label" class="canva-text mt-4 font-bold" style="color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Arrastra tu imagen aquí</p>
+        <p data-template-id="file-help" class="canva-text mt-1 text-sm" style="color: rgb(101, 112, 128); font-weight: 400; font-style: normal; font-size: 14px;">o selecciona un archivo desde tu dispositivo</p><label for="image-input" data-template-id="choose-file-label" class="canva-button mt-6 inline-flex cursor-pointer items-center gap-2 rounded-xl px-5 py-3 font-semibold transition" style="background: rgb(29, 41, 57); color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 16px;">Elegir imagen</label> <input id="image-input" type="file" accept="image/png,image/jpeg,image/webp" class="sr-only">
+       </div>
+      </div>
+     </section>
+     <section id="workspace-section" class="hidden" aria-labelledby="workspace-title">
+      <div class="mb-5 flex flex-col gap-4 rounded-[1.7rem] bg-[#1d2939] p-5 text-white shadow-xl sm:flex-row sm:items-center sm:justify-between">
+       <div>
+        <p data-template-id="workspace-eyebrow" class="canva-text text-xs font-bold uppercase tracking-[.16em]" style="color: rgb(255, 198, 90); font-weight: 700; font-style: normal; font-size: 12px;">Área de trabajo</p>
+        <h2 id="workspace-title" data-template-id="workspace-title" class="canva-text mt-1 font-['Fraunces'] font-bold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 24px;">Detecta tus stickers y edítalos uno por uno</h2>
+        <p id="workspace-info" class="mt-1 text-sm text-[#d8e0e9]"></p>
+       </div>
+       <div class="flex flex-wrap gap-2"><button id="detect-button" data-template-id="detect-button" type="button" class="canva-button inline-flex items-center gap-2 rounded-xl px-4 py-3 font-bold shadow-[0_4px_0_#cf3f1a]" style="background: rgb(242, 92, 50); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Detectar stickers</button> <button id="change-image-button" data-template-id="change-image-button" type="button" class="canva-button inline-flex items-center gap-2 rounded-xl border border-white/40 px-4 py-3 font-semibold" style="background: transparent; color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 16px;">Cambiar imagen</button>
+       </div>
+      </div>
+      <section data-template-id="workspace-panel" class="canva-panel rounded-[1.8rem] p-4 shadow-[0_12px_35px_rgba(53,42,25,.10)] sm:p-5" style="background: rgb(255, 255, 255);">
+       <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <p data-template-id="workspace-help" class="canva-text text-sm" style="color: rgb(101, 112, 128); font-weight: 400; font-style: normal; font-size: 14px;">Usa la vista para revisar la imagen original antes de editar cada resultado.</p>
+        <div class="flex gap-2"><button id="main-zoom-out" data-template-id="main-zoom-out" type="button" class="canva-button rounded-lg border p-2" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57);"><i data-lucide="minus" class="h-5 w-5"></i></button> <button id="main-fit" data-template-id="main-fit" type="button" class="canva-button rounded-lg border px-3 py-2 text-sm font-semibold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 600; font-style: normal; font-size: 16px;">Ajustar vista</button> <button id="main-zoom-in" data-template-id="main-zoom-in" type="button" class="canva-button rounded-lg border p-2" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57);"><i data-lucide="plus" class="h-5 w-5"></i></button>
+        </div>
+       </div>
+       <div id="main-preview" class="main-canvas-wrap checker relative overflow-hidden rounded-2xl border border-[#cbd4cf]">
+        <canvas id="main-canvas" class="absolute"></canvas>
+        <div id="main-empty" class="absolute inset-0 flex items-center justify-center text-center">
+         <p data-template-id="main-empty-text" class="canva-text max-w-sm" style="color: rgb(101, 112, 128); font-weight: 400; font-style: normal; font-size: 16px;">Tu imagen aparecerá aquí para detectar los stickers.</p>
+        </div>
+       </div>
+      </section>
+      <section class="mt-6 rounded-[1.8rem] bg-white p-5 shadow-[0_12px_35px_rgba(53,42,25,.10)] sm:p-7" aria-labelledby="stickers-title">
+       <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+         <p data-template-id="results-eyebrow" class="canva-text text-xs font-bold uppercase tracking-[.16em]" style="color: rgb(242, 92, 50); font-weight: 700; font-style: normal; font-size: 12px;">Resultados confirmados</p>
+         <h2 id="stickers-title" data-template-id="results-title" class="canva-text mt-1 font-['Fraunces'] font-bold" style="color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 24px;">Abre cualquier sticker para editarlo</h2>
+         <p id="results-summary" class="mt-1 text-sm text-[#657080]"></p>
+         <p class="mt-2 text-xs text-[#657080]">Copia el PNG transparente y pégalo en otro diseño de Canva, o descarga los seleccionados en un ZIP.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2"><label for="select-all-stickers" class="inline-flex items-center gap-2 text-sm font-semibold text-[#1d2939]"><input id="select-all-stickers" type="checkbox" class="h-4 w-4 accent-[#f25c32]"> <span data-template-id="select-all-label" class="canva-text" style="color: rgb(29, 41, 57); font-weight: 600; font-style: normal; font-size: 16px;">Seleccionar todos</span></label> <button id="copy-selected-button" type="button" class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d2939] px-4 py-3 font-bold text-white">Copiar seleccionados</button> <button id="download-zip-button" data-template-id="download-zip-button" type="button" class="canva-button inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold shadow-[0_4px_0_#cf3f1a]" style="background: rgb(242, 92, 50); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;"><i data-lucide="file-archive" class="h-4 w-4"></i> Descargar ZIP</button> <button id="import-selected-button" data-template-id="import-selected-button" type="button" class="canva-button inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d2939] px-4 py-3 font-bold text-white" style="background: rgb(29, 41, 57); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Importar todas a Canva</button>
+        </div>
+       </div>
+       <div id="thumbnail-row" class="mt-5 flex gap-4 overflow-x-auto pb-3 snap-x"></div>
+       <p id="results-empty" data-template-id="results-empty" class="canva-text mt-5 rounded-xl p-4 text-sm" style="background: rgb(255, 246, 217); color: rgb(117, 83, 20); font-weight: 400; font-style: normal; font-size: 16px;">Aún no hay stickers. Pulsa Detectar stickers después de cargar una imagen.</p>
+      </section>
+     </section>
+     <section id="status-box" class="mt-5 hidden" aria-live="polite">
+      <div id="status-message" class="rounded-2xl border px-5 py-4 text-sm"></div>
+     </section>
+    </div>
+   </main>
+  </div>
+  <div id="editor-modal" class="fixed inset-0 z-50 hidden bg-[#17202ce6] p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="editor-title">
+   <div class="mx-auto flex h-full max-w-[1500px] flex-col overflow-hidden rounded-[1.8rem] bg-[#fffaf1] shadow-2xl">
+    <header data-template-id="editor-header" class="canva-header flex flex-wrap items-center justify-between gap-3 p-5 text-white" style="background: rgb(29, 41, 57);">
+     <div>
+      <p data-template-id="editor-eyebrow" class="canva-text text-xs font-bold uppercase tracking-[.16em]" style="color: rgb(255, 198, 90); font-weight: 700; font-style: normal; font-size: 12px;">Edición individual</p>
+      <h2 id="editor-title" data-template-id="editor-title" class="canva-text mt-1 font-['Fraunces'] font-bold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 24px;">Ajusta la máscara del sticker</h2>
+     </div><button id="close-editor" data-template-id="cancel-button-top" type="button" class="canva-button inline-flex items-center gap-2 rounded-xl border border-white/40 px-4 py-2 font-bold" style="background: transparent; color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Cerrar</button>
+    </header>
+    <div class="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_320px]">
+     <section class="min-h-0 p-3 sm:p-5">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+       <p data-template-id="editor-help" class="canva-text text-sm" style="color: rgb(101, 112, 128); font-weight: 400; font-style: normal; font-size: 14px;">Trabaja sobre el tablero de transparencia. Los cambios no se guardan hasta confirmar.</p>
+       <div class="flex items-center gap-2"><button id="editor-zoom-out" data-template-id="editor-zoom-out" type="button" class="canva-button rounded-lg border p-2" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57);"><i data-lucide="minus" class="h-4 w-4"></i></button> <span id="editor-zoom-label" class="min-w-14 text-center text-sm font-bold">100%</span> <button id="editor-fit" data-template-id="editor-fit" type="button" class="canva-button rounded-lg border px-3 py-2 text-sm font-semibold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 600; font-style: normal; font-size: 16px;">Ajustar</button> <button id="editor-zoom-in" data-template-id="editor-zoom-in" type="button" class="canva-button rounded-lg border p-2" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57);"><i data-lucide="plus" class="h-4 w-4"></i></button>
+       </div>
+      </div>
+      <div id="editor-stage" class="editor-stage checker relative overflow-hidden rounded-2xl border border-[#cbd4cf]">
+       <div id="editor-scene" class="scene">
+        <canvas id="editor-canvas"></canvas>
+        <div id="selection-overlay"></div>
+       </div>
+      </div>
+     </section>
+     <aside data-template-id="tools-panel" class="canva-sidebar overflow-y-auto p-5 sm:p-6" style="background: rgb(230, 240, 223);">
+      <h3 data-template-id="tools-title" class="canva-text font-['Fraunces'] font-bold" style="color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 22px;">Herramientas</h3>
+      <p data-template-id="tools-help" class="canva-text mt-1 text-sm leading-relaxed" style="color: rgb(82, 97, 110); font-weight: 400; font-style: normal; font-size: 14px;">Elige una herramienta y usa el dedo o el cursor directamente sobre el sticker.</p>
+      <div class="mt-5 grid grid-cols-2 gap-2"><button id="tool-brush" data-template-id="brush-button" type="button" class="tool-button canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Brocha</button> <button id="tool-pan" data-template-id="pan-button" type="button" class="tool-button canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Mover vista</button> <button id="tool-rect" data-template-id="rect-button" type="button" class="tool-button canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Rectangular</button> <button id="tool-ellipse" data-template-id="ellipse-button" type="button" class="tool-button canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Circular / elíptica</button> <button id="tool-lasso" data-template-id="lasso-button" type="button" class="tool-button canva-button col-span-2 rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Lazo libre</button>
+      </div>
+      <div id="brush-controls" class="mt-5 border-t border-[#bfd0c2] pt-5"><label data-template-id="brush-size-label" for="brush-size" class="canva-text text-sm font-bold" style="color: rgb(56, 97, 69); font-weight: 700; font-style: normal; font-size: 16px;">Tamaño de brocha</label>
+       <div class="mt-2 flex items-center gap-3"><input id="brush-size" type="range" min="6" max="180" value="42" class="w-full"> <span id="brush-size-value" class="w-10 text-right text-sm font-bold">42</span>
+       </div><label data-template-id="brush-hardness-label" for="brush-hardness" class="canva-text mt-4 block text-sm font-bold" style="color: rgb(56, 97, 69); font-weight: 700; font-style: normal; font-size: 16px;">Dureza de brocha</label>
+       <div class="mt-2 flex items-center gap-3"><input id="brush-hardness" type="range" min="10" max="100" value="85" class="w-full"> <span id="brush-hardness-value" class="w-10 text-right text-sm font-bold">85%</span>
+       </div>
+      </div>
+      <div class="mt-5 border-t border-[#bfd0c2] pt-5">
+       <p data-template-id="selection-label" class="canva-text text-sm font-bold" style="color: rgb(56, 97, 69); font-weight: 700; font-style: normal; font-size: 16px;">Acciones de selección</p>
+       <p id="selection-status" class="mt-1 text-xs text-[#657080]"></p>
+       <div class="mt-3 grid grid-cols-2 gap-2"><button id="erase-outside" data-template-id="erase-outside-button" type="button" class="canva-button rounded-xl px-3 py-3 text-sm font-bold" style="background: rgb(242, 92, 50); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Borrar fuera de la selección</button> <button id="erase-inside" data-template-id="erase-inside-button" type="button" class="canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Borrar dentro de la selección</button>
+       </div>
+      </div>
+      <div class="mt-5 grid grid-cols-2 gap-2 border-t border-[#bfd0c2] pt-5"><button id="undo-button" data-template-id="undo-button" type="button" class="canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Deshacer</button> <button id="redo-button" data-template-id="redo-button" type="button" class="canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Rehacer</button> <button id="restore-button" data-template-id="restore-button" type="button" class="canva-button col-span-2 rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Restaurar</button>
+      </div>
+      <div class="mt-5 grid grid-cols-2 gap-2"><button id="cancel-button" data-template-id="cancel-button" type="button" class="canva-button rounded-xl border bg-white px-3 py-3 text-sm font-bold" style="background: rgb(255, 255, 255); color: rgb(29, 41, 57); font-weight: 700; font-style: normal; font-size: 16px;">Cancelar</button> <button id="confirm-button" data-template-id="confirm-button" type="button" class="canva-button rounded-xl px-3 py-3 text-sm font-bold" style="background: rgb(29, 41, 57); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">Confirmar cambios</button>
+      </div>
+     </aside>
+    </div>
+   </div>
+  </div>
+  <template id="thumb-template">
+   <article class="sticker-thumb relative overflow-hidden rounded-2xl border border-[#e1e6e2] bg-white shadow-sm"><label class="absolute right-2 top-2 z-10 rounded-full bg-white/95 p-1 shadow"><input class="sticker-select h-4 w-4 accent-[#f25c32]" type="checkbox" aria-label="Seleccionar sticker"></label><button type="button" class="remove-sticker absolute left-2 top-2 z-10 rounded-full bg-white/95 px-2 py-1 text-sm font-bold text-[#963922] shadow" aria-label="Eliminar sticker">×</button><button type="button" class="open-sticker block w-full text-left">
+     <div class="checker flex aspect-[1.15] items-center justify-center p-2">
+      <canvas class="thumb-canvas max-h-full max-w-full"></canvas>
+     </div>
+     <div class="flex items-center justify-between gap-2 p-3">
+      <div>
+       <p class="thumb-name text-sm font-bold"></p>
+       <p class="thumb-state text-xs text-[#657080]"></p>
+      </div><i data-lucide="pencil" class="h-4 w-4 text-[#f25c32]"></i>
+     </div></button>
+    <div class="mx-3 mb-3 grid grid-cols-2 gap-2">
+     <button type="button" class="copy-sticker flex items-center justify-center rounded-lg bg-[#1d2939] px-2 py-2 text-xs font-bold text-white">Copiar sticker</button><button type="button" class="download-sticker flex items-center justify-center gap-1 rounded-lg bg-[#f25c32] px-2 py-2 text-xs font-bold text-white"><i data-lucide="download" class="h-3 w-3"></i> PNG</button>
+    </div>
+   </article>
+  </template>
+  <script>
+    const $ = id => document.getElementById(id);
+    const state = { source:null, clean:null, stickers:[], selectedIds:new Set(), nextId:1, mainZoom:1, mainPan:{x:30,y:30}, active:null };
+    const edit = { sticker:null, mask:null, history:[], redo:[], tool:"brush", zoom:1, pan:{x:30,y:30}, drawing:false, last:null, selection:null, lasso:[], tempStart:null };
+    const mainCanvas=$("main-canvas"), mainCtx=mainCanvas.getContext("2d"), editorCanvas=$("editor-canvas"), editorCtx=editorCanvas.getContext("2d");
+
+    function status(message,type="info") {
+      const themes={info:"border-[#9bc6d0] bg-[#eaf7fa] text-[#195665]",error:"border-[#eea59a] bg-[#fff0ed] text-[#963922]",success:"border-[#a9cfb4] bg-[#edf8ef] text-[#26623a]"};
+      $("status-message").className="rounded-2xl border px-5 py-4 text-sm "+themes[type];
+      $("status-message").textContent=message; $("status-box").classList.remove("hidden");
+    }
+    const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+    function cloneCanvas(canvas){ const c=document.createElement("canvas"); c.width=canvas.width;c.height=canvas.height;c.getContext("2d").drawImage(canvas,0,0);return c; }
+
+    function maskCanvas(w,h){const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);return c;}
+    function composite(sticker,mask) {
+      const out=document.createElement("canvas");out.width=sticker.canvas.width;out.height=sticker.canvas.height;
+      const x=out.getContext("2d");x.drawImage(sticker.canvas,0,0);x.globalCompositeOperation="destination-in";x.drawImage(mask,0,0);return out;
+    }
+    function cropCanvas(source,x,y,w,h) { const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(source,x,y,w,h,0,0,w,h);return c; }
+
+    function renderMain() {
+      if(!state.source)return;
+      mainCanvas.width=state.source.width;mainCanvas.height=state.source.height;
+      mainCanvas.style.width=state.source.width+"px";mainCanvas.style.height=state.source.height+"px";
+      mainCanvas.style.transformOrigin="0 0";mainCanvas.style.transform=`translate(${state.mainPan.x}px,${state.mainPan.y}px) scale(${state.mainZoom})`;
+      mainCtx.clearRect(0,0,mainCanvas.width,mainCanvas.height);mainCtx.drawImage(state.source,0,0);
+    }
+    function fitMain(){
+      if(!state.source)return; const r=$("main-preview").getBoundingClientRect(),pad=30;
+      state.mainZoom=Math.min((r.width-pad)/state.source.width,(r.height-pad)/state.source.height,1);
+      state.mainPan={x:(r.width-state.source.width*state.mainZoom)/2,y:(r.height-state.source.height*state.mainZoom)/2};renderMain();
+    }
+
+    function brightnessBg(canvas) {
+      const x=canvas.getContext("2d"), d=x.getImageData(0,0,canvas.width,canvas.height), w=canvas.width,h=canvas.height;
+      const out=cloneCanvas(canvas), od=out.getContext("2d").getImageData(0,0,w,h), seen=new Uint8Array(w*h), q=[];
+      const sample=[]; function push(i){if(!seen[i]){seen[i]=1;q.push(i);}}
+      for(let xx=0;xx<w;xx++){push(xx);push((h-1)*w+xx)} for(let y=1;y<h-1;y++){push(y*w);push(y*w+w-1)}
+      q.forEach(i=>sample.push([d.data[i*4],d.data[i*4+1],d.data[i*4+2]]));
+      const avg=sample.reduce((a,v)=>[a[0]+v[0],a[1]+v[1],a[2]+v[2]],[0,0,0]).map(v=>v/Math.max(1,sample.length));
+      for(let k=0;k<q.length;k++){const i=q[k],p=i*4,dr=Math.hypot(d.data[p]-avg[0],d.data[p+1]-avg[1],d.data[p+2]-avg[2]);if(dr<58||d.data[p+3]<25){od.data[p+3]=0;const xx=i%w,y=Math.floor(i/w);[[1,0],[-1,0],[0,1],[0,-1]].forEach(a=>{const nx=xx+a[0],ny=y+a[1];if(nx>=0&&ny>=0&&nx<w&&ny<h)push(ny*w+nx);});}}
+      out.getContext("2d").putImageData(od,0,0);return out;
+    }
+    function detectComponents(canvas) {
+      const d=canvas.getContext("2d").getImageData(0,0,canvas.width,canvas.height).data,w=canvas.width,h=canvas.height, seen=new Uint8Array(w*h),results=[],min=Math.max(80,w*h*.00025);
+      for(let i=0;i<w*h;i++){if(seen[i]||d[i*4+3]<40)continue;let q=[i],count=0,x0=w,y0=h,x1=0,y1=0;seen[i]=1;
+        for(let k=0;k<q.length;k++){let n=q[k],x=n%w,y=Math.floor(n/w);count++;x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);
+          [[1,0],[-1,0],[0,1],[0,-1]].forEach(a=>{let nx=x+a[0],ny=y+a[1],ni=ny*w+nx;if(nx>=0&&ny>=0&&nx<w&&ny<h&&!seen[ni]&&d[ni*4+3]>=40){seen[ni]=1;q.push(ni);}});
+        } if(count>=min)results.push({x:x0,y:y0,w:x1-x0+1,h:y1-y0+1});
+      } return results.sort((a,b)=>a.y-b.y||a.x-b.x);
+    }
+    function detect() {
+      if(!state.clean)return; const boxes=detectComponents(state.clean);
+      state.selectedIds.clear();state.stickers=boxes.map(box=>{const pad=10,x=Math.max(0,box.x-pad),y=Math.max(0,box.y-pad),w=Math.min(state.clean.width-x,box.w+pad*2),h=Math.min(state.clean.height-y,box.h+pad*2);const c=cropCanvas(state.clean,x,y,w,h);return{id:state.nextId++,canvas:c,mask:maskCanvas(w,h)};});
+      if(!state.stickers.length){status("No se detectaron elementos separados. Prueba otra imagen con más contraste.","error");}
+      else {status("Stickers detectados. Toca una miniatura para abrir su editor individual.","success");}
+      renderThumbs();
+    }
+    function syncSelection(){const all=$("select-all-stickers"),live=state.stickers.map(s=>s.id);all.checked=live.length>0&&live.every(id=>state.selectedIds.has(id));all.indeterminate=live.some(id=>state.selectedIds.has(id))&&!all.checked;$('results-summary').textContent=live.length?live.length+" stickers en la lista · "+state.selectedIds.size+" seleccionados.":"";}
+    function renderThumbs() {
+      const row=$("thumbnail-row"); row.innerHTML="";
+      $("results-empty").classList.toggle("hidden",state.stickers.length>0);
+      $("results-summary").textContent=state.stickers.length ? state.stickers.length+" stickers confirmados y listos para editar o descargar." : "";
+      state.stickers.forEach((s,i)=>{
+        const node=$("thumb-template").content.cloneNode(true),card=node.querySelector("article"),canvas=node.querySelector("canvas"),out=composite(s,s.mask);
+        canvas.width=out.width;canvas.height=out.height;canvas.getContext("2d").drawImage(out,0,0);
+        node.querySelector(".thumb-name").textContent="Sticker "+(i+1);node.querySelector(".thumb-state").textContent="Tocar para editar";
+        const check=node.querySelector(".sticker-select");check.checked=state.selectedIds.has(s.id);check.addEventListener("click",e=>e.stopPropagation());check.addEventListener("change",()=>{check.checked?state.selectedIds.add(s.id):state.selectedIds.delete(s.id);syncSelection();});
+        node.querySelector(".open-sticker").addEventListener("click",()=>openEditor(s.id));
+        node.querySelector(".remove-sticker").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();state.stickers=state.stickers.filter(item=>item.id!==s.id);state.selectedIds.delete(s.id);renderThumbs();status("Sticker eliminado. Vuelve a Detectar stickers para recuperarlo.","success");});
+        node.querySelector(".download-sticker").addEventListener("click",()=>downloadCanvas(composite(s,s.mask),"sticker-"+(i+1)+".png"));
+        node.querySelector(".copy-sticker").addEventListener("click",async e=>{e.stopPropagation();const ok=await copyCanvasImage(composite(s,s.mask));status(ok?"Sticker copiado. Pégalo con Ctrl+V o Cmd+V en tu diseño de Canva.":copyFallback,ok?"success":"info");});
+        row.appendChild(node);
+      }); syncSelection(); lucide.createIcons();
+    }
+
+    function openEditor(id) {
+      const sticker=state.stickers.find(s=>s.id===id);if(!sticker)return;
+      edit.sticker=sticker;edit.mask=cloneCanvas(sticker.mask);edit.history=[];edit.redo=[];edit.selection=null;edit.lasso=[];edit.tool="brush";
+      $("editor-modal").classList.remove("hidden");requestAnimationFrame(()=>{fitEditor();setTool("brush");renderEditor();});
+    }
+    function closeEditor(){ $("editor-modal").classList.add("hidden"); edit.sticker=null; }
+    function fitEditor() {
+      if(!edit.sticker)return;const r=$("editor-stage").getBoundingClientRect(),pad=45;
+      edit.zoom=Math.min((r.width-pad)/edit.sticker.canvas.width,(r.height-pad)/edit.sticker.canvas.height,2);
+      edit.pan={x:(r.width-edit.sticker.canvas.width*edit.zoom)/2,y:(r.height-edit.sticker.canvas.height*edit.zoom)/2};renderEditor();
+    }
+    function renderEditor() {
+      if(!edit.sticker)return;
+      const out=composite(edit.sticker,edit.mask);editorCanvas.width=out.width;editorCanvas.height=out.height;editorCtx.clearRect(0,0,out.width,out.height);editorCtx.drawImage(out,0,0);
+      $("editor-scene").style.transform=`translate(${edit.pan.x}px,${edit.pan.y}px) scale(${edit.zoom})`;
+      $("editor-zoom-label").textContent=Math.round(edit.zoom*100)+"%";renderSelection();
+      $("undo-button").disabled=!edit.history.length;$("redo-button").disabled=!edit.redo.length;
+    }
+    function renderSelection() {
+      const host=$("selection-overlay");host.innerHTML="";
+      if(!edit.selection)return;
+      const s=edit.selection;
+      if(s.type==="lasso"){const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("class","selection-path");svg.setAttribute("width",edit.sticker.canvas.width);svg.setAttribute("height",edit.sticker.canvas.height);const p=document.createElementNS("http://www.w3.org/2000/svg","polygon");p.setAttribute("points",s.points.map(p=>p.x+","+p.y).join(" "));p.setAttribute("fill","rgba(242,92,50,.13)");p.setAttribute("stroke","#f25c32");p.setAttribute("stroke-width","2");p.setAttribute("stroke-dasharray","6 4");svg.appendChild(p);host.appendChild(svg);}
+      else {const el=document.createElement("div");el.className="selection-shape "+(s.type==="ellipse"?"ellipse":"");el.style.left=s.x+"px";el.style.top=s.y+"px";el.style.width=s.w+"px";el.style.height=s.h+"px";host.appendChild(el);}
+      $("selection-status").textContent="Selección lista: elige qué zona borrar.";
+    }
+    function setTool(tool) {
+      edit.tool=tool;document.querySelectorAll(".tool-button").forEach(b=>b.classList.remove("active"));
+      const map={brush:"tool-brush",pan:"tool-pan",rect:"tool-rect",ellipse:"tool-ellipse",lasso:"tool-lasso"};$(map[tool]).classList.add("active");
+      $("editor-stage").classList.toggle("pan-mode",tool==="pan");
+      $("brush-controls").classList.toggle("opacity-50",tool!=="brush");
+      $("selection-status").textContent=tool==="brush"?"Pinta las áreas que quieres volver transparentes.":tool==="pan"?"Arrastra para desplazarte por el sticker.":"Arrastra sobre el sticker para crear una selección.";
+    }
+    function point(e){const r=$("editor-stage").getBoundingClientRect();return{x:clamp((e.clientX-r.left-edit.pan.x)/edit.zoom,0,edit.sticker.canvas.width),y:clamp((e.clientY-r.top-edit.pan.y)/edit.zoom,0,edit.sticker.canvas.height)};}
+    function snapshot(){edit.history.push(cloneCanvas(edit.mask));if(edit.history.length>30)edit.history.shift();edit.redo=[];}
+    function brushDot(x,y) {
+      const ctx=edit.mask.getContext("2d"),size=Number($("brush-size").value),hard=Number($("brush-hardness").value)/100,inner=Math.max(0,hard-.08);
+      const g=ctx.createRadialGradient(x,y,size*inner/2,x,y,size/2);g.addColorStop(0,"rgba(0,0,0,1)");g.addColorStop(Math.max(inner,.01),"rgba(0,0,0,1)");g.addColorStop(1,"rgba(0,0,0,0)");
+      ctx.globalCompositeOperation="destination-out";ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,size/2,0,Math.PI*2);ctx.fill();ctx.globalCompositeOperation="source-over";
+    }
+    function selectionMask() {
+      if(!edit.selection)return null;const c=document.createElement("canvas");c.width=edit.sticker.canvas.width;c.height=edit.sticker.canvas.height;const x=c.getContext("2d"),s=edit.selection;x.fillStyle="#fff";
+      if(s.type==="rect")x.fillRect(s.x,s.y,s.w,s.h);
+      if(s.type==="ellipse"){x.beginPath();x.ellipse(s.x+s.w/2,s.y+s.h/2,s.w/2,s.h/2,0,0,Math.PI*2);x.fill();}
+      if(s.type==="lasso"){x.beginPath();s.points.forEach((p,i)=>i?x.lineTo(p.x,p.y):x.moveTo(p.x,p.y));x.closePath();x.fill();}
+      return c;
+    }
+    function eraseSelection(outside) {
+      const sel=selectionMask();if(!sel){status("Primero crea una selección rectangular, elíptica o de lazo.","error");return;}snapshot();
+      const x=edit.mask.getContext("2d");if(outside){const inverse=document.createElement("canvas");inverse.width=sel.width;inverse.height=sel.height;const ix=inverse.getContext("2d");ix.fillStyle="#fff";ix.fillRect(0,0,inverse.width,inverse.height);ix.globalCompositeOperation="destination-out";ix.drawImage(sel,0,0);x.globalCompositeOperation="destination-out";x.drawImage(inverse,0,0);}
+      else {x.globalCompositeOperation="destination-out";x.drawImage(sel,0,0);}
+      x.globalCompositeOperation="source-over";renderEditor();
+    }
+    function undo(){if(!edit.history.length)return;edit.redo.push(cloneCanvas(edit.mask));edit.mask=edit.history.pop();renderEditor();}
+    function redo(){if(!edit.redo.length)return;edit.history.push(cloneCanvas(edit.mask));edit.mask=edit.redo.pop();renderEditor();}
+    function restore(){snapshot();edit.mask=maskCanvas(edit.sticker.canvas.width,edit.sticker.canvas.height);edit.selection=null;renderEditor();}
+    function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+    function canvasToBlob(c){return new Promise(resolve=>c.toBlob(resolve,"image/png"));}
+    function downloadCanvas(c,name){canvasToBlob(c).then(blob=>{if(blob)downloadBlob(blob,name);});}
+    async function copyCanvasImage(canvas){
+      if(!navigator.clipboard||typeof ClipboardItem==="undefined"||!navigator.clipboard.write)return false;
+      try{const blob=await canvasToBlob(canvas);if(!blob)return false;await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);return true;}catch(e){return false;}
+    }
+    const copyFallback="La copia directa de imágenes no está disponible en este navegador. Haz clic derecho sobre el sticker y elige ‘Copiar imagen’ o ‘Guardar imagen como’.";
+
+    // Renderiza cada sticker seleccionado (imagen + máscara) como PNG transparente y los empaqueta en un ZIP.
+    async function downloadSelectedZip(){
+      if(typeof JSZip==="undefined"){status("No se pudo cargar la librería ZIP. Revisa tu conexión e inténtalo de nuevo.","error");return;}
+      const selected=state.stickers.filter(s=>state.selectedIds.has(s.id));
+      if(!selected.length){status("Selecciona al menos un sticker para exportar en ZIP.","error");return;}
+      const button=$("download-zip-button");button.disabled=true;
+      status("Generando ZIP con "+selected.length+(selected.length===1?" sticker…":" stickers…"),"info");
+      try{
+        const zip=new JSZip(),folder=zip.folder("stickers");
+        for(const s of selected){
+          const index=state.stickers.indexOf(s)+1,blob=await canvasToBlob(composite(s,s.mask));
+          if(!blob)throw new Error("No se pudo renderizar el sticker "+index);
+          folder.file("sticker-"+String(index).padStart(2,"0")+".png",blob);
+        }
+        const content=await zip.generateAsync({type:"blob",compression:"STORE"});
+        downloadBlob(content,"stickers.zip");
+        status("ZIP descargado con "+selected.length+(selected.length===1?" sticker":" stickers")+" en PNG transparente.","success");
+      }catch(e){status("No se pudo generar el ZIP. Inténtalo de nuevo.","error");}
+      finally{button.disabled=false;}
+    }
+
+    $("editor-stage").addEventListener("pointerdown",e=>{
+      if(!edit.sticker)return;$("editor-stage").setPointerCapture(e.pointerId);const p=point(e);edit.drawing=true;
+      if(edit.tool==="pan"){edit.last={x:e.clientX,y:e.clientY,pan:{...edit.pan}};$("editor-stage").classList.add("dragging");return;}
+      if(edit.tool==="brush"){snapshot();edit.last=p;brushDot(p.x,p.y);renderEditor();return;}
+      edit.tempStart=p;
+      if(edit.tool==="lasso"){edit.lasso=[p];edit.selection={type:"lasso",points:edit.lasso};} else edit.selection={type:edit.tool,x:p.x,y:p.y,w:1,h:1};renderEditor();
+    });
+    $("editor-stage").addEventListener("pointermove",e=>{
+      if(!edit.drawing)return;
+      if(edit.tool==="pan"){edit.pan={x:edit.last.pan.x+e.clientX-edit.last.x,y:edit.last.pan.y+e.clientY-edit.last.y};renderEditor();return;}
+      const p=point(e);
+      if(edit.tool==="brush"){const dx=p.x-edit.last.x,dy=p.y-edit.last.y,dist=Math.hypot(dx,dy),step=Math.max(2,Number($("brush-size").value)/5);for(let i=0;i<=dist;i+=step)brushDot(edit.last.x+dx*i/dist,edit.last.y+dy*i/dist);edit.last=p;renderEditor();return;}
+      if(edit.tool==="lasso"){edit.lasso.push(p);edit.selection={type:"lasso",points:edit.lasso};}
+      else {edit.selection={type:edit.tool,x:Math.min(edit.tempStart.x,p.x),y:Math.min(edit.tempStart.y,p.y),w:Math.abs(p.x-edit.tempStart.x),h:Math.abs(p.y-edit.tempStart.y)};}renderEditor();
+    });
+    ["pointerup","pointercancel"].forEach(type=>$("editor-stage").addEventListener(type,()=>{edit.drawing=false;$("editor-stage").classList.remove("dragging");}));
+
+    function loadFile(file) {
+      if(!file)return;if(!["image/png","image/jpeg","image/webp"].includes(file.type)){status("Elige una imagen PNG, JPG o WEBP.","error");return;}
+      const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const scale=Math.min(1,2400/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext("2d").drawImage(img,0,0,c.width,c.height);state.source=c;state.clean=brightnessBg(c);state.stickers=[];$("upload-section").classList.add("hidden");$("workspace-section").classList.remove("hidden");$("workspace-info").textContent=file.name+" · "+c.width+" × "+c.height+" px";$("main-empty").classList.add("hidden");requestAnimationFrame(fitMain);renderThumbs();status("Imagen cargada. Pulsa “Detectar stickers” para crear miniaturas editables.","success");};img.src=reader.result;};reader.readAsDataURL(file);
+    }
+
+    $("image-input").addEventListener("change",e=>loadFile(e.target.files[0]));
+    ["dragenter","dragover"].forEach(t=>$("upload-zone").addEventListener(t,e=>{e.preventDefault();$("upload-zone").classList.add("dragging");}));
+    ["dragleave","drop"].forEach(t=>$("upload-zone").addEventListener(t,e=>{e.preventDefault();$("upload-zone").classList.remove("dragging");}));
+    $("upload-zone").addEventListener("drop",e=>loadFile(e.dataTransfer.files[0]));
+    $("detect-button").addEventListener("click",detect);
+    $("change-image-button").addEventListener("click",()=>{state.source=null;state.clean=null;state.stickers=[];$("workspace-section").classList.add("hidden");$("upload-section").classList.remove("hidden");$("image-input").value="";$("status-box").classList.add("hidden");});
+    $("main-zoom-in").addEventListener("click",()=>{state.mainZoom=clamp(state.mainZoom*1.25,.1,5);renderMain();});
+    $("main-zoom-out").addEventListener("click",()=>{state.mainZoom=clamp(state.mainZoom/1.25,.1,5);renderMain();});
+    $("main-fit").addEventListener("click",fitMain);
+    $("tool-brush").onclick=()=>setTool("brush");$("tool-pan").onclick=()=>setTool("pan");$("tool-rect").onclick=()=>setTool("rect");$("tool-ellipse").onclick=()=>setTool("ellipse");$("tool-lasso").onclick=()=>setTool("lasso");
+    $("brush-size").oninput=e=>$("brush-size-value").textContent=e.target.value;
+    $("brush-hardness").oninput=e=>$("brush-hardness-value").textContent=e.target.value+"%";
+    $("erase-outside").onclick=()=>eraseSelection(true);$("erase-inside").onclick=()=>eraseSelection(false);$("undo-button").onclick=undo;$("redo-button").onclick=redo;$("restore-button").onclick=restore;
+    $("editor-zoom-in").onclick=()=>{edit.zoom=clamp(edit.zoom*1.25,.1,8);renderEditor();};$("editor-zoom-out").onclick=()=>{edit.zoom=clamp(edit.zoom/1.25,.1,8);renderEditor();};$("editor-fit").onclick=fitEditor;
+    $("cancel-button").onclick=closeEditor;$("close-editor").onclick=closeEditor;
+    $("confirm-button").onclick=()=>{edit.sticker.mask=cloneCanvas(edit.mask);renderThumbs();closeEditor();status("Cambios confirmados. La miniatura y las descargas ya usan esta máscara.","success");};
+    $("select-all-stickers").addEventListener("change",e=>{state.selectedIds=e.target.checked?new Set(state.stickers.map(s=>s.id)):new Set();document.querySelectorAll(".sticker-select").forEach(c=>c.checked=e.target.checked);syncSelection();});
+    $("copy-selected-button").addEventListener("click",async()=>{const selected=state.stickers.filter(s=>state.selectedIds.has(s.id));if(!selected.length){status("Selecciona al menos un sticker para copiar.","error");return;}if(selected.length>1){status("Selecciona y copia cada sticker por separado: Canva no permite pegar varios PNG a la vez desde aquí. Para varios a la vez usa Descargar ZIP.","info");return;}const ok=await copyCanvasImage(composite(selected[0],selected[0].mask));status(ok?"Sticker copiado. Pégalo con Ctrl+V o Cmd+V en tu diseño de Canva.":copyFallback,ok?"success":"info");});
+    $("download-zip-button").addEventListener("click",downloadSelectedZip);
+    $("import-selected-button").addEventListener("click",()=>{if(!state.selectedIds.size){status("Selecciona al menos un sticker para continuar.","error");return;}status("La importación directa a Canva no está disponible aquí. Descarga los seleccionados en ZIP y súbelos desde el editor de Canva.","info");});
+    window.addEventListener("resize",()=>{if(state.source)fitMain();if(edit.sticker)fitEditor();});
+    lucide.createIcons();
+  </script>
+
+</body></html>
