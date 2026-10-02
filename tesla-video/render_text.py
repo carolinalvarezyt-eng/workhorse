@@ -45,6 +45,10 @@ SHADOW = (0, 0, 0)
 COLORS = {"body": WHITE, "bold": LIGHT_PINK, "script": WHITE}
 SIZES = {"body": 58, "bold": 190, "script": 215}
 STROKE = {"body": 0, "bold": 0, "script": 3}
+# Tight leading around the script (in script em): its ascenders and descenders
+# reach into the neighbouring line's gaps, but are pushed down until they clear its letters.
+SCRIPT_LEAD_IN = 0.30
+SCRIPT_LEAD_OUT = 0.05
 
 # (start, end, block centre y, lines). A line is (kind, text[, size, start]).
 # Cut points of the source: 2.43 makeup, 13.80 app screen, 16.70 tower,
@@ -153,7 +157,29 @@ def render_line(kind, text, size=None):
     sh = np.roll(np.asarray(sh, np.float32) / 255.0, 3, axis=0) * 0.45
     over(np.array(SHADOW, np.float32) / 255.0, sh)
     over(col, m)
-    return out, origin[1], (box[1], box[3])
+    return out, origin[1], (box[1], box[3]), size
+
+
+def ink(img):
+    """Text pixels of a rendered line, grown a little so lines keep a hairline gap."""
+    m = Image.fromarray(((img[..., 3] > 0.5) * 255).astype(np.uint8))
+    return np.asarray(m.filter(ImageFilter.MaxFilter(9))) > 0
+
+
+def collides(a, b):
+    """True if the ink of two placed items overlaps (both centred horizontally)."""
+    ha, wa = a["ink"].shape
+    hb, wb = b["ink"].shape
+    ya, yb = a["base"] - a["off"], b["base"] - b["off"]
+    xa, xb = (W - wa) // 2, (W - wb) // 2
+    y0, y1 = int(max(ya, yb)), int(min(ya + ha, yb + hb))
+    x0, x1 = max(xa, xb), min(xa + wa, xb + wb)
+    if y1 <= y0 or x1 <= x0:
+        return False
+    ra = a["ink"][y0 - int(ya):y1 - int(ya), x0 - xa:x1 - xa]
+    rb = b["ink"][y0 - int(yb):y1 - int(yb), x0 - xb:x1 - xb]
+    n = min(ra.shape[0], rb.shape[0])
+    return bool((ra[:n] & rb[:n]).any())
 
 
 def layout(beat):
@@ -164,15 +190,27 @@ def layout(beat):
         size = line[2] if len(line) > 2 else None
         # the opening hook is fully on screen from frame 0 (cover + loop)
         t0 = line[3] if len(line) > 3 else start + (i * STAGGER if start > 0 else 0)
-        img, base, (top, bottom) = render_line(kind, text, size)
+        img, base, (top, bottom), size = render_line(kind, text, size)
+        tight = False
         if prev is not None:
             if prev["kind"] == "body" and kind == "body":
                 y += SIZES["body"] * 1.35
-            else:  # stack on the ink so swashes never collide
-                y += prev["bottom"] - top + (14 if kind == "body" or prev["kind"] == "body" else 8)
-        items.append(dict(kind=kind, img=img, base=y, off=base, top=top, bottom=bottom,
-                          t0=t0, end=end, instant=(start == 0.0)))
-        prev = items[-1]
+            elif kind == "script":  # tuck the script up under the line above
+                y += max(prev["bottom"], 0) + SCRIPT_LEAD_IN * size
+                tight = True
+            elif prev["kind"] == "script":  # and the next line right under its x-height
+                y += SCRIPT_LEAD_OUT * prev["size"] - top
+                tight = True
+            else:  # stack on the ink
+                y += prev["bottom"] - top + 14
+        it = dict(kind=kind, img=img, ink=ink(img), base=y, off=base, top=top, bottom=bottom,
+                  size=size, t0=t0, end=end, instant=(start == 0.0))
+        # tight leading, but never let strokes run over the other line's letters
+        while tight and any(collides(it, other) for other in items):
+            it["base"] += 2
+        y = it["base"]
+        items.append(it)
+        prev = it
     mid = (items[0]["base"] + items[0]["top"] + items[-1]["base"] + items[-1]["bottom"]) / 2
     for it in items:
         h, w = it["img"].shape[:2]
