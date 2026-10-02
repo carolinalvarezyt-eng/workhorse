@@ -2,8 +2,11 @@
 
 Usage: python3 render_text.py INPUT.mp4 OUTPUT.mp4 [--preview T1,T2,...]
 
-Dreamy, romantic look: a soft editorial serif (Cormorant Garamond) in ivory
-paired with a handwritten love-note script (Style Script) in champagne gold.
+Three type styles, no glow:
+  body   – Montserrat ExtraBold, white
+  bold   – Bebas Neue, light pink
+  script – Brittany Signature, white (drop fonts/BrittanySignature.ttf or .otf
+           in place; until then Mrs Saint Delafield stands in for it)
 Every caption is timed to the actual cuts of the source video.
 """
 import math
@@ -15,27 +18,33 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SERIF = os.path.join(HERE, "fonts", "CormorantGaramond-600.ttf")
-SCRIPT = os.path.join(HERE, "fonts", "StyleScript-400.ttf")
+
+
+def font_path(*names):
+    for name in names:
+        path = os.path.join(HERE, "fonts", name)
+        if os.path.exists(path):
+            return path
+    raise FileNotFoundError(names[-1])
+
+
+FONTS = {
+    "body": font_path("Montserrat-800.ttf"),
+    "bold": font_path("BebasNeue-400.ttf"),
+    "script": font_path("BrittanySignature.ttf", "BrittanySignature.otf",
+                        "MrsSaintDelafield-400.ttf"),
+}
 
 W, H, FPS = 1080, 1920, 30
 MAX_W = 900  # keeps text clear of the TikTok side buttons
 
-IVORY = (255, 248, 238)
-CHAMPAGNE_LIGHT = (250, 230, 185)
-CHAMPAGNE = (214, 166, 82)
-GLOW = (255, 214, 150)
+WHITE = (255, 255, 255)
+LIGHT_PINK = (255, 194, 214)
 SHADOW = (0, 0, 0)
 
-# Two colours: ivory for the serif, champagne gold for the script.
-# fill: solid colour or (top, bottom) gradient; glow: (colour, radius, strength)
-STYLES = {
-    "serif": dict(fill=IVORY, glow=None),
-    "script": dict(fill=(CHAMPAGNE_LIGHT, CHAMPAGNE), glow=(GLOW, 12, 0.3)),
-}
-
-SERIF_SIZE = 90
-SCRIPT_SIZE = 175
+COLORS = {"body": WHITE, "bold": LIGHT_PINK, "script": WHITE}
+SIZES = {"body": 58, "bold": 190, "script": 215}
+STROKE = {"body": 0, "bold": 0, "script": 3}
 
 # (start, end, block centre y, lines). A line is (kind, text[, size, start]).
 # Cut points of the source: 2.43 makeup, 13.80 app screen, 16.70 tower,
@@ -44,108 +53,94 @@ SCRIPT_SIZE = 175
 BEATS = [
     # 0:00 hook – already driving
     (0.00, 2.70, 1240, [
-        ("serif", "Así se veía el momento"),
-        ("serif", "que llevaba tanto tiempo"),
+        ("body", "Así se veía el momento"),
+        ("body", "que llevaba tanto tiempo"),
         ("script", "imaginando"),
     ]),
     (2.80, 6.20, 1240, [
-        ("serif", "el día en que fui por"),
-        ("script", "mi primer carro", 185),
+        ("body", "el día en que fui por"),
+        ("bold", "MI PRIMER CARRO", 175),
     ]),
     # makeup
     (6.50, 10.00, 1240, [
-        ("serif", "Me arreglé con la ilusión"),
-        ("script", "de una niña"),
+        ("body", "Me arreglé"),
+        ("script", "con calma"),
     ]),
     (10.25, 13.55, 1240, [
-        ("serif", "y el corazón"),
-        ("script", "a mil", 215),
+        ("body", "pero con el corazón"),
+        ("bold", "A MIL", 230),
     ]),
     # Tesla on the app screen – first hint
     (13.90, 16.10, 1240, [
-        ("serif", "Ya sabía que iba por"),
-        ("script", "mi Tesla", 200),
+        ("body", "Ya sabía que iba por"),
+        ("bold", "MI TESLA", 210),
     ]),
     # delivery tower
     (16.20, 18.40, 1240, [
-        ("serif", "pero nada me preparó para"),
-        ("script", "lo que iba a sentir"),
+        ("body", "pero nada me preparó para"),
+        ("script", "lo que iba a sentir", 190),
     ]),
     # reveal on the platform (then a breath with only the car)
     (18.65, 20.80, 1300, [
-        ("serif", "Y entonces"),
-        ("script", "lo vi", 225),
+        ("body", "Y entonces"),
+        ("bold", "LO VI", 240),
     ]),
     # reflection in the glass
     (22.35, 24.90, 1240, [
-        ("serif", "Era simplemente"),
-        ("script", "perfecto", 205),
+        ("body", "Era simplemente"),
+        ("script", "perfecto", 240),
     ]),
     # side, wheel, sky
     (25.20, 28.30, 1240, [
-        ("script", "Blanco", 215),
-        ("serif", "como siempre lo quise"),
+        ("script", "Blanco", 245),
+        ("body", "como siempre lo quise"),
     ]),
     # interior / screen
     (28.60, 31.40, 1240, [
-        ("serif", "Después de tanto esperar"),
-        ("script", "por fin llegó"),
+        ("body", "Después de tanto esperar"),
+        ("bold", "POR FIN LLEGÓ", 185),
     ]),
     # steering wheel, road, palm trees
     (32.00, 37.70, 1240, [
-        ("serif", "Estaba viviendo el momento"),
-        ("serif", "que tanto"),
-        ("script", "había soñado", 190),
+        ("body", "Estaba viviendo el momento"),
+        ("body", "que tanto"),
+        ("script", "había soñado"),
     ]),
     # you driving – thank you
     (38.90, 42.70, 1240, [
-        ("script", "Gracias, amor", 185),
-        ("serif", "por hacerlo realidad"),
+        ("script", "Gracias, amor", 220),
+        ("body", "por hacerlo realidad"),
     ]),
     (42.90, 47.80, 1240, [
-        ("serif", "y por sorprenderme"),
-        ("script", "cada día", 215),
+        ("body", "y por sorprenderme"),
+        ("bold", "CADA DÍA", 220),
     ]),
 ]
 
-SERIF_IN = 0.45   # fade + rise
+TEXT_IN = 0.45    # fade + rise for body and bold
 SCRIPT_IN = 0.85  # handwriting wipe
 STAGGER = 0.18
 OUT = 0.30
 
 
-def blur(mask, radius):
-    img = Image.fromarray((mask * 255).astype(np.uint8))
-    return np.asarray(img.filter(ImageFilter.GaussianBlur(radius)), dtype=np.float32) / 255.0
-
-
 def render_line(kind, text, size=None):
     """Return (premultiplied RGBA float array, baseline y, ink box) for one line."""
-    st = STYLES[kind]
-    size = size or (SCRIPT_SIZE if kind == "script" else SERIF_SIZE)
-    path = SCRIPT if kind == "script" else SERIF
-    stroke = 2 if kind == "script" else 0
+    size = size or SIZES[kind]
+    stroke = STROKE[kind]
     while True:
-        font = ImageFont.truetype(path, size)
+        font = ImageFont.truetype(FONTS[kind], size)
         box = font.getbbox(text, anchor="ls", stroke_width=stroke)
-        if box[2] - box[0] <= MAX_W or size < 40:
+        if box[2] - box[0] <= MAX_W or size < 30:
             break
         size -= 2
-    pad = 60
+    pad = 30
     w, h = box[2] - box[0] + 2 * pad, box[3] - box[1] + 2 * pad
     origin = (pad - box[0], pad - box[1])
     img = Image.new("L", (w, h), 0)
     ImageDraw.Draw(img).text(origin, text, font=font, fill=255, anchor="ls",
                              stroke_width=stroke, stroke_fill=255)
     m = np.asarray(img, dtype=np.float32) / 255.0
-
-    fill = st["fill"]
-    if isinstance(fill[0], tuple):
-        top, bot = np.array(fill[0], np.float32), np.array(fill[1], np.float32)
-        t = np.clip((np.arange(h) - pad) / max(1, h - 2 * pad), 0, 1)[:, None, None]
-        col = np.broadcast_to(top + (bot - top) * t, (h, w, 3)) / 255.0
-    else:
-        col = np.broadcast_to(np.array(fill, np.float32) / 255.0, (h, w, 3))
+    col = np.array(COLORS[kind], np.float32) / 255.0
 
     out = np.zeros((h, w, 4), np.float32)
 
@@ -153,14 +148,10 @@ def render_line(kind, text, size=None):
         out[..., :3] = rgb * a[..., None] + out[..., :3] * (1 - a[..., None])
         out[..., 3] = a + out[..., 3] * (1 - a)
 
-    # soft drop shadow for legibility on bright shots
-    sh_alpha = 0.8 if kind == "script" else 0.6
-    sh = np.clip(np.roll(np.roll(blur(m, 5), 4, axis=0), 2, axis=1) * 1.7, 0, 1) * sh_alpha
+    # crisp, tight drop shadow (no glow) so white/pink stay readable on bright shots
+    sh = Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.5))
+    sh = np.roll(np.asarray(sh, np.float32) / 255.0, 3, axis=0) * 0.45
     over(np.array(SHADOW, np.float32) / 255.0, sh)
-    if st["glow"]:
-        gcol, grad, gstr = st["glow"]
-        g = np.clip(blur(m, grad) * 2.2 * gstr, 0, 1) * 0.85
-        over(np.array(gcol, np.float32) / 255.0, g)
     over(col, m)
     return out, origin[1], (box[1], box[3])
 
@@ -175,10 +166,10 @@ def layout(beat):
         t0 = line[3] if len(line) > 3 else start + (i * STAGGER if start > 0 else 0)
         img, base, (top, bottom) = render_line(kind, text, size)
         if prev is not None:
-            if prev["kind"] == "serif" and kind == "serif":
-                y += SERIF_SIZE * 1.3
+            if prev["kind"] == "body" and kind == "body":
+                y += SIZES["body"] * 1.35
             else:  # stack on the ink so swashes never collide
-                y += prev["bottom"] - top + (6 if kind == "script" else 16)
+                y += prev["bottom"] - top + (14 if kind == "body" or prev["kind"] == "body" else 8)
         items.append(dict(kind=kind, img=img, base=y, off=base, top=top, bottom=bottom,
                           t0=t0, end=end, instant=(start == 0.0)))
         prev = items[-1]
@@ -200,13 +191,13 @@ def frame_alpha(it, t):
         return None
     a, dy, wipe = 1.0, 0, None
     if not it["instant"]:
-        if it["kind"] == "serif":
-            p = min(1.0, (t - it["t0"]) / SERIF_IN)
-            a, dy = ease(p), int(round((1 - ease(p)) * 22))
-        else:
+        if it["kind"] == "script":
             p = min(1.0, (t - it["t0"]) / SCRIPT_IN)
             a = min(1.0, p * 3)
             wipe = ease(p) if p < 1 else None
+        else:
+            p = min(1.0, (t - it["t0"]) / TEXT_IN)
+            a, dy = ease(p), int(round((1 - ease(p)) * 22))
     if t > it["end"] - OUT:
         a *= max(0.0, (it["end"] - t) / OUT)
     return a, dy, wipe
