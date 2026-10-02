@@ -2,9 +2,8 @@
 
 Usage: python3 render_text.py INPUT.mp4 OUTPUT.mp4 [--preview T1,T2,...]
 
-Style follows the reference TikTok: a thin high-contrast serif (Playfair Display)
-paired with a big calligraphic script (Great Vibes): plain white serif and
-pink-to-fuchsia script.
+Dreamy, romantic look: a soft editorial serif (Cormorant Garamond) in ivory
+paired with a handwritten love-note script (Style Script) in champagne gold.
 Every caption is timed to the actual cuts of the source video.
 """
 import math
@@ -16,26 +15,27 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SERIF = os.path.join(HERE, "fonts", "PlayfairDisplay-500.ttf")
-SCRIPT = os.path.join(HERE, "fonts", "GreatVibes-400.ttf")
+SERIF = os.path.join(HERE, "fonts", "CormorantGaramond-600.ttf")
+SCRIPT = os.path.join(HERE, "fonts", "StyleScript-400.ttf")
 
 W, H, FPS = 1080, 1920, 30
 MAX_W = 900  # keeps text clear of the TikTok side buttons
 
-WHITE = (255, 255, 255)
-PINK = (255, 105, 185)
-FUCHSIA = (232, 0, 132)
+IVORY = (255, 248, 238)
+CHAMPAGNE_LIGHT = (250, 230, 185)
+CHAMPAGNE = (214, 166, 82)
+GLOW = (255, 214, 150)
 SHADOW = (0, 0, 0)
 
-# Serif: plain white, no halo. Script: pink-to-fuchsia with a fuchsia glow.
+# Two colours: ivory for the serif, champagne gold for the script.
 # fill: solid colour or (top, bottom) gradient; glow: (colour, radius, strength)
 STYLES = {
-    "serif": dict(fill=WHITE, glow=None),
-    "script": dict(fill=(PINK, FUCHSIA), glow=(FUCHSIA, 16, 0.9)),
+    "serif": dict(fill=IVORY, glow=None),
+    "script": dict(fill=(CHAMPAGNE_LIGHT, CHAMPAGNE), glow=(GLOW, 12, 0.3)),
 }
 
-SERIF_SIZE = 70
-SCRIPT_SIZE = 150
+SERIF_SIZE = 90
+SCRIPT_SIZE = 175
 
 # (start, end, block centre y, lines). A line is (kind, text[, size, start]).
 # Cut points of the source: 2.43 makeup, 13.80 app screen, 16.70 tower,
@@ -46,66 +46,65 @@ BEATS = [
     (0.00, 2.70, 1240, [
         ("serif", "Así se veía el momento"),
         ("serif", "que llevaba tanto tiempo"),
-        ("script", "imaginando:"),
+        ("script", "imaginando"),
     ]),
     (2.80, 6.20, 1240, [
         ("serif", "el día en que fui por"),
-        ("script", "Mi primer carro", 165),
+        ("script", "mi primer carro", 185),
     ]),
     # makeup
-    (6.50, 13.55, 1240, [
-        ("serif", "Llevaba muchísimo tiempo"),
-        ("serif", "imaginando cómo sería"),
-        ("script", "ese día…", 170),
+    (6.50, 10.00, 1240, [
+        ("serif", "Me arreglé con la ilusión"),
+        ("script", "de una niña"),
+    ]),
+    (10.25, 13.55, 1240, [
+        ("serif", "y el corazón"),
+        ("script", "a mil", 215),
     ]),
     # Tesla on the app screen – first hint
     (13.90, 16.10, 1240, [
-        ("serif", "Y aunque yo ya sabía"),
-        ("serif", "que iba por"),
-        ("script", "mi Tesla,", 170),
+        ("serif", "Ya sabía que iba por"),
+        ("script", "mi Tesla", 200),
     ]),
     # delivery tower
     (16.20, 18.40, 1240, [
-        ("serif", "creo que todavía no entendía"),
-        ("script", "lo especial"),
-        ("serif", "que iba a sentirse."),
+        ("serif", "pero nada me preparó para"),
+        ("script", "lo que iba a sentir"),
     ]),
     # reveal on the platform (then a breath with only the car)
     (18.65, 20.80, 1300, [
-        ("serif", "Hasta que finalmente"),
-        ("script", "lo vi ahí…", 170),
+        ("serif", "Y entonces"),
+        ("script", "lo vi", 225),
     ]),
     # reflection in the glass
     (22.35, 24.90, 1240, [
-        ("serif", "Y sí… era exactamente como"),
-        ("script", "lo había imaginado.", 135),
+        ("serif", "Era simplemente"),
+        ("script", "perfecto", 205),
     ]),
     # side, wheel, sky
     (25.20, 28.30, 1240, [
-        ("script", "Blanco,", 185),
-        ("serif", "como siempre lo había querido."),
+        ("script", "Blanco", 215),
+        ("serif", "como siempre lo quise"),
     ]),
     # interior / screen
     (28.60, 31.40, 1240, [
-        ("serif", "Y después de tanto imaginarlo…"),
-        ("serif", "finalmente estaba"),
-        ("script", "sentada ahí."),
+        ("serif", "Después de tanto esperar"),
+        ("script", "por fin llegó"),
     ]),
     # steering wheel, road, palm trees
     (32.00, 37.70, 1240, [
-        ("serif", "Y por fin estaba viviendo"),
-        ("serif", "ese momento que tantas veces"),
-        ("script", "había imaginado."),
+        ("serif", "Estaba viviendo el momento"),
+        ("serif", "que tanto"),
+        ("script", "había soñado", 190),
     ]),
     # you driving – thank you
     (38.90, 42.70, 1240, [
-        ("script", "Gracias, amor,", 165),
-        ("serif", "por convertir mis sueños"),
-        ("serif", "en realidad…"),
+        ("script", "Gracias, amor", 185),
+        ("serif", "por hacerlo realidad"),
     ]),
     (42.90, 47.80, 1240, [
         ("serif", "y por sorprenderme"),
-        ("script", "cada día.", 190),
+        ("script", "cada día", 215),
     ]),
 ]
 
@@ -125,7 +124,7 @@ def render_line(kind, text, size=None):
     st = STYLES[kind]
     size = size or (SCRIPT_SIZE if kind == "script" else SERIF_SIZE)
     path = SCRIPT if kind == "script" else SERIF
-    stroke = 2 if kind == "script" else 0  # the reference script is heavier
+    stroke = 2 if kind == "script" else 0
     while True:
         font = ImageFont.truetype(path, size)
         box = font.getbbox(text, anchor="ls", stroke_width=stroke)
@@ -155,7 +154,8 @@ def render_line(kind, text, size=None):
         out[..., 3] = a + out[..., 3] * (1 - a)
 
     # soft drop shadow for legibility on bright shots
-    sh = np.clip(np.roll(np.roll(blur(m, 4), 3, axis=0), 2, axis=1) * 1.6, 0, 1) * 0.6
+    sh_alpha = 0.8 if kind == "script" else 0.6
+    sh = np.clip(np.roll(np.roll(blur(m, 5), 4, axis=0), 2, axis=1) * 1.7, 0, 1) * sh_alpha
     over(np.array(SHADOW, np.float32) / 255.0, sh)
     if st["glow"]:
         gcol, grad, gstr = st["glow"]
